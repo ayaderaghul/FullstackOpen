@@ -1,0 +1,8 @@
+sequenceDiagram
+    participant browser
+    participant server
+
+    browser->>server: POST https://studies.cs.helsinki.fi/exampleapp/new_note_spa
+    activate server
+    Note right of browser: 201 CREATED {"message":"note created"} The browser appends the new child into the node tree 
+    
