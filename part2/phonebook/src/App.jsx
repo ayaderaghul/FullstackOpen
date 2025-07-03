@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import axios from 'axios'
 import personService from './services/persons'
+import Notification from './components/Notification'
+import Error from './components/Error'
 
 const Filter = ({ newSearch, handleSearchChange}) => { 
   return (
@@ -51,6 +53,8 @@ const App = () => {
   const [newNumber, setNewNumber] = useState('')
   const [newSearch, setNewSearch] = useState('')
   const [showAll, setShowAll] = useState(true)
+  const [successMessage, setSuccessMessage] = useState('some success happened ..')
+  const [errorMessage, setErrorMessage] = useState('some error happened ..')
 
   useEffect(()=> { 
     personService
@@ -93,6 +97,13 @@ const App = () => {
               setNewName('')
               setNewNumber('')
             })
+          .catch(error => { 
+            setErrorMessage(`Person '${existingPerson.name }' was removed from server`)
+            setTimeout(()=>{ 
+              setErrorMessage(null)
+            },5000)
+            setPersons(persons.filter(p=>p.id!==existingPerson.id))
+          }) 
         }
         
     } else { 
@@ -105,6 +116,10 @@ const App = () => {
           setNewNumber('')
         })
     }
+    setSuccessMessage(`${newName } added successfully`)
+    setTimeout(()=>{ 
+      setSuccessMessage(null)
+    },5000)
   }
   const personsToShow = showAll ? persons : persons.filter(person => person.name.toLowerCase().includes(newSearch.toLowerCase()))
 
@@ -122,6 +137,8 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message={ successMessage} />
+      <Error message={ errorMessage} />
       <Filter newSearch={newSearch} handleSearchChange={handleSearchChange} />
       <h2>add a new</h2>
       <PersonForm addName={addName } newName={ newName} handleNameChange={ handleNameChange} newNumber={ newNumber} handleNumberChange={ handleNumberChange} />
