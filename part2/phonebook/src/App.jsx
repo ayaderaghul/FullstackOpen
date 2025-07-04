@@ -33,18 +33,19 @@ const PersonForm =({addName, newName, handleNameChange, newNumber, handleNumberC
   )
 }
 
-const Persons =({personsToShow, onDelete }) => (
+const Persons = ({ personsToShow, onDelete }) => (
   <ul>
-      { personsToShow.map((person,index) =>
-        <li key={ index}>
-          { person.name } { person.number } 
-          <button type="submit" 
-          onClick={()=>onDelete(person.id)}
-           >delete</button>
-        </li>
-      ) }
-      </ul>
+    {Array.isArray(personsToShow)  // ADDED ARRAY CHECK
+      ? personsToShow.map(person => (
+          <li key={person.id}>   {/* Use id instead of index */}
+            {person.name} {person.number}
+            <button onClick={() => onDelete(person.id)}>delete</button>
+          </li>
+        ))
+      : null}
+  </ul>
 )
+
 
 const App = () => {
   const [persons, setPersons] = useState([])
@@ -96,6 +97,8 @@ const App = () => {
               setPersons(persons.map(p=>p.id === existingPerson.id ? updatedPerson :p))
               setNewName('')
               setNewNumber('')
+              setSuccessMessage(`${newName}'s number updated`)
+              setTimeout(() => setSuccessMessage(null), 5000) 
             })
           .catch(error => { 
             setErrorMessage(`Person '${existingPerson.name }' was removed from server`)
@@ -114,25 +117,31 @@ const App = () => {
           setPersons(persons.concat(returnedPerson))
           setNewName('')
           setNewNumber('')
+          setSuccessMessage(`${newName} added successfully`)
+          setTimeout(() => setSuccessMessage(null), 5000)
         })
     }
-    setSuccessMessage(`${newName } added successfully`)
-    setTimeout(()=>{ 
-      setSuccessMessage(null)
-    },5000)
+    // setSuccessMessage(`${newName } added successfully`)
+    // setTimeout(()=>{ 
+    //   setSuccessMessage(null)
+    // },5000)
   }
   const personsToShow = showAll ? persons : persons.filter(person => person.name.toLowerCase().includes(newSearch.toLowerCase()))
 
 
   const deletePerson = (id) => { 
-    const person = persons.find(p => p.id === id)
-    if (window.confirm(`Delete ${ person.name}?`)) { }
-      personService.deletePerson(id)
-        .then(() => { 
-          setPersons(persons.filter(p=>p.id!==id))
-        })
-        
+  const person = persons.find(p => p.id === id)
+  if (person && window.confirm(`Delete ${person.name}?`)) {  // FIXED CONDITIONAL BLOCK
+    personService.deletePerson(id)
+      .then(() => { 
+        setPersons(persons.filter(p => p.id !== id))
+      })
+      .catch(error => {
+        setErrorMessage(`Error deleting ${person.name}`)
+        setTimeout(() => setErrorMessage(null), 5000)
+      })
   }
+}
   
   return (
     <div>
