@@ -120,6 +120,15 @@ const App = () => {
           setSuccessMessage(`${newName} added successfully`)
           setTimeout(() => setSuccessMessage(null), 5000)
         })
+        .catch(error => { 
+          console.log('hello error')
+          // console.log(error)
+          console.log(error.response.data.error)
+          setErrorMessage(error.response.data.error)
+          setTimeout(()=>{ 
+            setErrorMessage(null)
+          },5000)
+        })
     }
     // setSuccessMessage(`${newName } added successfully`)
     // setTimeout(()=>{ 
