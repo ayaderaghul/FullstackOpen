@@ -1,28 +1,68 @@
-const Blog = require('../models/blog');
+const blogsRouter = require('express').Router()
+const Blog = require('../models/blog')
 
-const getAllBlogs = async (req, res) => {
-  try {
-    const blogs = await Blog.find({});
-    res.json(blogs);
-  } catch (error) {
-    res.status(500).json({ error: 'Server error' });
-  }
-};
+blogsRouter.get('/', (request, response) => {
+  Blog.find({}).then(notes => {
+    response.json(notes)
+  })
+})
 
-const createBlog = async (req, res) => {
-  try {
-    const blog = new Blog(req.body);
-    const savedBlog = await blog.save();
-    res.status(201).json(savedBlog);
-  } catch (error) {
-    if (error.name === 'ValidationError') {
-      return res.status(400).json({ error: error.message });
-    }
-    res.status(500).json({ error: 'Server error' });
-  }
-};
+blogsRouter.get('/:id', (request, response, next) => {
+  Blog.findById(request.params.id)
+    .then(blog => {
+      if (blog) {
+        response.json(blog)
+      } else {
+        response.status(404).end()
+      }
+    })
+    .catch(error => next(error))
+})
 
-module.exports = {
-  getAllBlogs,
-  createBlog
-};
+blogsRouter.post('/', (request, response, next) => {
+  const body = request.body
+
+  const blog = new Blog({
+    title: body.title,
+    author: body.author,
+    url: body.url,
+    likes: body.likes
+  })
+
+  blog.save()
+    .then(savedBlog => {
+      response.json(savedBlog)
+    })
+    .catch(error => next(error))
+})
+
+blogsRouter.delete('/:id', (request, response, next) => {
+  Blog.findByIdAndDelete(request.params.id)
+    .then(() => {
+      response.status(204).end()
+    })
+    .catch(error => next(error))
+})
+
+blogsRouter.put('/:id', (request, response, next) => {
+  const { title, author, url, likes } = request.body
+
+  Blog.findById(request.params.id)
+    .then(blog => {
+      if (!blog) {
+        return response.status(404).end()
+      }
+
+      blog.title = title
+      blog.author = author
+      blog.url = url
+      blog.likes = likes
+
+      return blog.save().then((updatedBlog) => {
+        response.json(updatedBlog)
+      })
+    })
+    .catch(error => next(error))
+})
+
+module.exports = blogsRouter
