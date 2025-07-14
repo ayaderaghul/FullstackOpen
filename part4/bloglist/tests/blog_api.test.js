@@ -54,6 +54,25 @@ test('a valid blog can be added ', async () => {
   assert(titles.includes('async/await simplifies making async calls'))
 })
 
+test('the identifier is id', async () => {
+  const newBlog = {
+    title: 'Test Blog for likes = 0',
+    author: 'Test Author',
+    url: 'http://testurl.com',
+    likes: 2
+  };
+
+  const response = await api
+    .post('/api/blogs')
+    .send(newBlog)
+    .expect(201)
+    .expect('Content-Type', /application\/json/);
+  assert(response.body.id !== undefined)
+  assert(response.body._id === undefined)
+  // expect(response.body.id).toBeDefined();
+  // expect(response.body._id).toBeUndefined();
+});
+
 test('blog without title is not added', async () => {
   const newBlog = {
     author: 'sim nguyen'
@@ -143,8 +162,6 @@ test('if not url, get 400', async () => {
     .expect(400)
     .expect('Content-Type', /application\/json/);
 });
-
-
 
 
 after(async () => {
