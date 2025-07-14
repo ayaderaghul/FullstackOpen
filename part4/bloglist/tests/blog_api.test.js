@@ -5,7 +5,6 @@ const supertest = require('supertest')
 const app = require('../app')
 const helper = require('./test_helper')
 const Blog = require('../models/blog')
-
 const api = supertest(app)
 
 beforeEach(async () => {
@@ -35,6 +34,23 @@ test('a specific blog is within the returned blogs', async () => {
 })
 
 test('a valid blog can be added ', async () => {
+
+  // login
+  const newUser = {
+    username: 'testuser',
+    name: 'Test User',
+    password: '123456'
+  }
+
+  await api.post('/api/users').send(newUser)
+
+  const loginResponse = await api
+    .post('/api/login')
+    .send({ username: newUser.username, password: newUser.password })
+
+  const token = loginResponse.body.token
+
+
   const newBlog = {
     title: 'async/await simplifies making async calls',
     author: 'thu nguyen',
@@ -44,6 +60,7 @@ test('a valid blog can be added ', async () => {
 
   await api
     .post('/api/blogs')
+    .set('Authorization', `Bearer ${token}`)
     .send(newBlog)
     .expect(201)
     .expect('Content-Type', /application\/json/)
@@ -55,6 +72,22 @@ test('a valid blog can be added ', async () => {
 })
 
 test('the identifier is id', async () => {
+  // login
+  const newUser = {
+    username: 'testuser',
+    name: 'Test User',
+    password: '123456'
+  }
+
+  await api.post('/api/users').send(newUser)
+
+  const loginResponse = await api
+    .post('/api/login')
+    .send({ username: newUser.username, password: newUser.password })
+
+  const token = loginResponse.body.token
+
+
   const newBlog = {
     title: 'Test Blog for likes = 0',
     author: 'Test Author',
@@ -64,22 +97,38 @@ test('the identifier is id', async () => {
 
   const response = await api
     .post('/api/blogs')
+    .set('Authorization', `Bearer ${token}`)
     .send(newBlog)
     .expect(201)
     .expect('Content-Type', /application\/json/);
   assert(response.body.id !== undefined)
   assert(response.body._id === undefined)
-  // expect(response.body.id).toBeDefined();
-  // expect(response.body._id).toBeUndefined();
 });
 
 test('blog without title is not added', async () => {
+  // login
+  const newUser = {
+    username: 'testuser',
+    name: 'Test User',
+    password: '123456'
+  }
+
+  await api.post('/api/users').send(newUser)
+
+  const loginResponse = await api
+    .post('/api/login')
+    .send({ username: newUser.username, password: newUser.password })
+
+  const token = loginResponse.body.token
+
+  
   const newBlog = {
     author: 'sim nguyen'
   }
 
   await api
     .post('/api/blogs')
+    .set('Authorization', `Bearer ${token}`)
     .send(newBlog)
     .expect(400)
 
@@ -102,12 +151,29 @@ test('a specific blog can be viewed', async () => {
 })
 
 test('a blog can be deleted', async () => {
+// login
+  const newUser = {
+    username: 'testuser',
+    name: 'Test User',
+    password: '123456'
+  }
+
+  await api.post('/api/users').send(newUser)
+
+  const loginResponse = await api
+    .post('/api/login')
+    .send({ username: newUser.username, password: newUser.password })
+
+  const token = loginResponse.body.token
+
+
   const blogsAtStart = await helper.blogsInDb()
   const blogToDelete = blogsAtStart[0]
 
 
   await api
     .delete(`/api/blogs/${blogToDelete.id}`)
+    .set('Authorization', `Bearer ${token}`)
     .expect(204)
 
   const blogsAtEnd = await helper.blogsInDb()
@@ -119,6 +185,22 @@ test('a blog can be deleted', async () => {
 })
 
 test('if not set, likes = 0', async () => {
+  // login
+  const newUser = {
+    username: 'testuser',
+    name: 'Test User',
+    password: '123456'
+  }
+
+  await api.post('/api/users').send(newUser)
+
+  const loginResponse = await api
+    .post('/api/login')
+    .send({ username: newUser.username, password: newUser.password })
+
+  const token = loginResponse.body.token
+
+
   const newBlog = {
     title: 'Test Blog for likes = 0',
     author: 'Test Author',
@@ -127,6 +209,7 @@ test('if not set, likes = 0', async () => {
 
   const response = await api
     .post('/api/blogs')
+    .set('Authorization', `Bearer ${token}`)
     .send(newBlog)
     .expect(201)
     .expect('Content-Type', /application\/json/);
@@ -138,6 +221,21 @@ test('if not set, likes = 0', async () => {
 });
 
 test('if not title, get 400', async () => {
+  // login
+  const newUser = {
+    username: 'testuser',
+    name: 'Test User',
+    password: '123456'
+  }
+
+  await api.post('/api/users').send(newUser)
+
+  const loginResponse = await api
+    .post('/api/login')
+    .send({ username: newUser.username, password: newUser.password })
+
+  const token = loginResponse.body.token
+
   const newBlog = {
     author: 'Test Author',
     url: 'http://testurl.com',
@@ -145,12 +243,29 @@ test('if not title, get 400', async () => {
 
   const response = await api
     .post('/api/blogs')
+    .set('Authorization', `Bearer ${token}`)
     .send(newBlog)
     .expect(400)
     .expect('Content-Type', /application\/json/);
 });
 
 test('if not url, get 400', async () => {
+  // login
+  const newUser = {
+    username: 'testuser',
+    name: 'Test User',
+    password: '123456'
+  }
+
+  await api.post('/api/users').send(newUser)
+
+  const loginResponse = await api
+    .post('/api/login')
+    .send({ username: newUser.username, password: newUser.password })
+
+  const token = loginResponse.body.token
+
+
   const newBlog = {
     author: 'Test Author',
     title: 'http://testurl.com',
@@ -158,6 +273,7 @@ test('if not url, get 400', async () => {
 
   const response = await api
     .post('/api/blogs')
+    .set('Authorization', `Bearer ${token}`)
     .send(newBlog)
     .expect(400)
     .expect('Content-Type', /application\/json/);

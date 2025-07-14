@@ -1,18 +1,13 @@
 const assert = require('node:assert')
-const { test, after, beforeEach } = require('node:test')
+const { test, after, beforeEach, describe } = require('node:test')
 const mongoose = require('mongoose')
 const supertest = require('supertest')
 const app = require('../app')
 const helper = require('./test_helper')
 const Blog = require('../models/blog')
-
-const api = supertest(app)
-
-
 const bcrypt = require('bcrypt')
 const User = require('../models/user')
-
-//...
+const api = supertest(app)
 
 describe('when there is initially one user in db', () => {
   beforeEach(async () => {
@@ -26,7 +21,7 @@ describe('when there is initially one user in db', () => {
 
   test('creation succeeds with a fresh username', async () => {
     const usersAtStart = await helper.usersInDb()
-
+    console.log('hello')
     const newUser = {
       username: 'mluukkai',
       name: 'Matti Luukkainen',
@@ -106,4 +101,9 @@ test('user without username is not added', async () => {
   assert.strictEqual(usersAtEnd.length, usersAtStart.length)
 })
 
+})
+
+
+after(async () => {
+  await mongoose.connection.close()
 })
