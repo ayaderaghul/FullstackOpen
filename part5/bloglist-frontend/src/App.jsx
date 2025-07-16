@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react'
-// import Blog from './components/Blog'
+import Blog from './components/Blog'
 import blogService from './services/blogs'
 import loginService from './services/login'
 import Notification from './components/Notification'
 import Togglable from './components/Togglable'
 import BlogForm from './components/BlogForm'
-import BlogPost from './components/BlogPost'
+// import BlogPost from './components/BlogPost'
 
 const App = () => {
   const [blogs, setBlogs] = useState([])
@@ -155,9 +155,12 @@ const App = () => {
     
 
       {blogs.sort((a, b) => b.likes - a.likes).map(blog =>
-        <Togglable key={blog.id} buttonLabel='view post'>
-          <BlogPost blog={blog} blogs={ blogs} setBlogs={setBlogs} user={ user }  />
-        </Togglable>
+        // <Togglable key={blog.id} buttonLabel='view post'>
+          /* <BlogPost blog={blog} blogs={ blogs} setBlogs={setBlogs} user={ user }  /> */
+          <Blog key={blog.id} blog={blog} blogs={blogs} setBlogs={setBlogs} user={ user} />
+        
+        
+        // </Togglable>
       )}
     </div>
   )

@@ -1,7 +1,9 @@
 import blogService from '../services/blogs'
 import { useState } from 'react'
+import BlogStats from './BlogStats'
+import Togglable from './Togglable'
 
-const Blog = ({ blog, blogs, setBlogs, user = null }) => { 
+const Blog = ({ blog, blogs, setBlogs, user = null,  handleLike: externalLike  }) => { 
   const [likes, setLikes] = useState(blog.likes)
   const showDeleteButton = user 
   && blog.user 
@@ -18,6 +20,7 @@ const Blog = ({ blog, blogs, setBlogs, user = null }) => {
   }
 
   const handleLike = async () => {
+    if (externalLike) return externalLike()
     const updatedBlog = { 
       title: blog.title,
       author: blog.author,
@@ -46,14 +49,24 @@ const Blog = ({ blog, blogs, setBlogs, user = null }) => {
   }
   
   return (
-  <div style={ blogStyle}>
-    TITLE: {blog.title} 
-    AUTHOR: {blog.author} 
-    URL: { blog.url} 
-    LIKES: { likes } 
-    <button onClick={handleLike} type="submit">like</button>
-    { showDeleteButton && (
-      <button onClick={handleDelete}>delete</button>)}
+  <div style={ blogStyle} className='blog'>
+    <div className='blogTitle'> 
+      TITLE: {blog.title} 
+    </div>
+    <div className='blogAuthor'> 
+      AUTHOR: {blog.author} 
+    </div>
+     
+     <Togglable buttonLabel="viewStats">
+    <BlogStats 
+      blog={blog} 
+      likes={likes}
+      handleLike={handleLike}
+      showDeleteButton={showDeleteButton}
+      handleDelete={handleDelete}
+    />
+      </Togglable>
+
   </div>  
   )
 }
