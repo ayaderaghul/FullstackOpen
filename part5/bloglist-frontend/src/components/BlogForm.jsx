@@ -2,7 +2,10 @@ const BlogForm = ({
     handleCreate,
     newBlogTitle,
     newBlogAuthor,
-    newBlogUrl
+    newBlogUrl,
+    setNewBlogTitle,
+    setNewBlogAuthor,
+    setNewBlogUrl
 }) => { 
     return (
         <form onSubmit={handleCreate}>

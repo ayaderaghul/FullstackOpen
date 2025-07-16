@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import Blog from './components/Blog'
+// import Blog from './components/Blog'
 import blogService from './services/blogs'
 import loginService from './services/login'
 import Notification from './components/Notification'
@@ -16,8 +16,8 @@ const App = () => {
   const [newBlogTitle, setNewBlogTitle] = useState('')
   const [newBlogAuthor, setNewBlogAuthor] = useState('')  
   const [newBlogUrl, setNewBlogUrl] = useState('')
-  const [blogFormVisible, setBlogFormVisible] = useState(false)
-  const [blogPostVisible, setBlogPostVisible] = useState(false)
+  // const [blogFormVisible, setBlogFormVisible] = useState(false)
+  // const [blogPostVisible, setBlogPostVisible] = useState(false)
 
   useEffect(() => {
     blogService.getAll().then(blogs =>
@@ -72,10 +72,18 @@ const App = () => {
     const newBlog = {
       title: newBlogTitle,
       author: newBlogAuthor,
-      url: newBlogUrl
+      url: newBlogUrl,
+      user:{ 
+        username: user.username,
+        name: user.name,
+        id: user.id
+      } 
     }
     try {
       const createdBlog = await blogService.create(newBlog)
+      
+
+
       setBlogs(blogs.concat(createdBlog))   
       setNewBlogTitle('')
       setNewBlogAuthor('')  
@@ -137,6 +145,9 @@ const App = () => {
         newBlogTitle={newBlogTitle}
         newBlogAuthor={newBlogAuthor}
         newBlogUrl={newBlogUrl}
+        setNewBlogTitle={setNewBlogTitle}
+        setNewBlogAuthor={setNewBlogAuthor}
+        setNewBlogUrl={setNewBlogUrl}
       />
     </Togglable>
 
