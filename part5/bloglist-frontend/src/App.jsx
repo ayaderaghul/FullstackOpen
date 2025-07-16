@@ -3,6 +3,9 @@ import Blog from './components/Blog'
 import blogService from './services/blogs'
 import loginService from './services/login'
 import Notification from './components/Notification'
+import Togglable from './components/Togglable'
+import BlogForm from './components/BlogForm'
+import BlogPost from './components/BlogPost'
 
 const App = () => {
   const [blogs, setBlogs] = useState([])
@@ -13,6 +16,8 @@ const App = () => {
   const [newBlogTitle, setNewBlogTitle] = useState('')
   const [newBlogAuthor, setNewBlogAuthor] = useState('')  
   const [newBlogUrl, setNewBlogUrl] = useState('')
+  const [blogFormVisible, setBlogFormVisible] = useState(false)
+  const [blogPostVisible, setBlogPostVisible] = useState(false)
 
   useEffect(() => {
     blogService.getAll().then(blogs =>
@@ -125,39 +130,23 @@ const App = () => {
       <p>{user.name} logged in <button onClick={handleLogout}>logout</button> </p>
       <h2>blogs</h2>
 
-      <form onSubmit={handleCreate}>
-        <div>
-          <input
-            type="text"
-            value={newBlogTitle}
-            name="Title"
-            placeholder="Blog title"
-            onChange={({ target }) => setNewBlogTitle(target.value)}
-          />
-        </div>
-        <div>
-          <input
-            type="text"
-            value={newBlogAuthor}
-            name="Author"
-            placeholder="Blog author"
-            onChange={({ target }) => setNewBlogAuthor(target.value)}
-          />
-        </div>
-        <div>
-          <input
-            type="text"
-            value={newBlogUrl}
-            name="URL"
-            placeholder="Blog URL"
-            onChange={({ target }) => setNewBlogUrl(target.value)}
-          />
-        </div>
-        <button type="submit">create</button>
-      </form>
+      
+    <Togglable buttonLabel='create blog'>
+      <BlogForm 
+        handleCreate={handleCreate}
+        newBlogTitle={newBlogTitle}
+        newBlogAuthor={newBlogAuthor}
+        newBlogUrl={newBlogUrl}
+      />
+    </Togglable>
 
-      {blogs.map(blog =>
-        <Blog key={blog.id} blog={blog} />
+
+    
+
+      {blogs.sort((a, b) => b.likes - a.likes).map(blog =>
+        <Togglable key={blog.id} buttonLabel='view post'>
+          <BlogPost blog={blog} blogs={ blogs} setBlogs={setBlogs} user={ user }  />
+        </Togglable>
       )}
     </div>
   )
