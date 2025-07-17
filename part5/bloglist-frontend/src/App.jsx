@@ -19,9 +19,13 @@ const App = () => {
   // const [blogFormVisible, setBlogFormVisible] = useState(false)
   // const [blogPostVisible, setBlogPostVisible] = useState(false)
 
+  const sortBlogsByLikes = (blogsToSort) => { 
+    return [...blogsToSort].sort((a,b) => b.likes - a.likes)
+  }
+
   useEffect(() => {
     blogService.getAll().then(blogs =>
-      setBlogs( blogs )
+      setBlogs( sortBlogsByLikes(blogs) )
     )  
   }, [])
 
@@ -31,14 +35,17 @@ const App = () => {
       const user = JSON.parse(loggedUserJSON)
       setUser(user)
       blogService.setToken(user.token)
+      setBlogs( blogs )
+
     }
   }, [])
 
   const handleLogin = async (event) => {
     event.preventDefault()
     try {
+      console.log('hello from handlelogin')
       const user = await loginService.login({
-        username, password,
+        username, password
       })
       window.localStorage.setItem(
         'loggedBlogappUser', JSON.stringify(user)
@@ -48,7 +55,7 @@ const App = () => {
       setUsername('')
       setPassword('')
       const blogs = await blogService.getAll()
-      setBlogs(blogs)
+      setBlogs(sortBlogsByLikes(blogs))
     } catch (exception) {
       setErrorMessage('Wrong credentials')
       setTimeout(() => {
@@ -66,6 +73,22 @@ const App = () => {
       setErrorMessage(null)
     }, 5000)
   }
+
+
+
+  const handleDelete = async (blog) => {
+    if (window.confirm(`Remove blog ${blog.title} by ${blog.author}?`)) {
+      try {
+        await blogService.deleteBlog(blog.id)
+        setBlogs(blogs.filter(b => b.id !== blog.id))
+        // Optionally, you can also update the state to remove the blog from the UI
+        console.log(`Blog ${blog.title} deleted`)
+      } catch (error) {
+        console.error('Error deleting blog:', error)
+      }
+    }
+  }
+
 
   const handleCreate = async (event) => {
     event.preventDefault()
@@ -100,6 +123,9 @@ const App = () => {
     }
   }
 
+      const sortedBlogs = sortBlogsByLikes(blogs)
+
+
   if (user === null) {
     return (
       <div>
@@ -109,6 +135,7 @@ const App = () => {
         <div>
           username
             <input
+            data-testid="username"
             type="text"
             value={username}
             name="Username"
@@ -118,6 +145,7 @@ const App = () => {
         <div>
           password
             <input
+            data-testid="password"
             type="password"
             value={password}
             name="Password"
@@ -152,12 +180,17 @@ const App = () => {
     </Togglable>
 
 
-    
 
-      {blogs.sort((a, b) => b.likes - a.likes).map(blog =>
+      {sortedBlogs.map(blog =>
         // <Togglable key={blog.id} buttonLabel='view post'>
           /* <BlogPost blog={blog} blogs={ blogs} setBlogs={setBlogs} user={ user }  /> */
-          <Blog key={blog.id} blog={blog} blogs={blogs} setBlogs={setBlogs} user={ user} />
+          <Blog 
+          key={blog.id} 
+          blog={blog} 
+          blogs={blogs}
+          handleDelete={() => handleDelete(blog)}
+          setBlogs={setBlogs} 
+          user={ user} />
         
         
         // </Togglable>

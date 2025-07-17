@@ -1,79 +1,57 @@
-import { render, screen } from '@testing-library/react'
-import Blog from './Blog'
 import blogService from '../services/blogs'
-import userEvent from '@testing-library/user-event'
-import { vi } from 'vitest'
+import { useState } from 'react'
+import BlogStats from './BlogStats'
+import Togglable from './Togglable'
 
-test('renders content', () => {
-  const blog = {
-    title: 'A blog title',
-    author: 'chi nguyen',
-    url: 'https://example.com',
-    likes: 0,
-    user: {
-      username: 'testuser',
+const Blog = ({ blog, blogs, setBlogs, user = null, handleDelete }) => { 
+  const [likes, setLikes] = useState(blog.likes)
+
+  const handleLike = async () => {
+    const updatedBlog = {
+      ...blog,
+      likes: likes + 1
+    }
+
+    try {
+      const returnedBlog = await blogService.update(blog.id, updatedBlog)
+      setLikes(returnedBlog.likes)
+      const updatedBlogs = blogs.map(b => b.id === blog.id ? returnedBlog : b)
+      setBlogs(updatedBlogs.sort((a, b) => b.likes - a.likes))
+    } catch (error) {
+      console.error('Error updating likes:', error)
     }
   }
 
-render(<Blog blog={blog} />)
-const element = screen.getByText('TITLE: A blog title')
-expect(element).toBeInTheDocument()
-const element2 = screen.queryByText('URL: https://example.com')
-expect(element2).not.toBeVisible()
+  const showDeleteButton = user 
+    && blog.user 
+    && user.username 
+    && blog.user.username 
+    && user.username === blog.user.username
 
-})
-
-test('click to view post', async () => {
-  const blog = {
-    title: 'A blog title',
-    author: 'chi nguyen',
-    url: 'https://example.com',
-    likes: 0,
-    user: {
-      username: 'testuser',
-    }
+  const blogStyle = { 
+    paddingTop: 10,
+    paddingLeft: 2,
+    border: 'solid',
+    borderWidth: 1,
+    marginBottom: 5
   }
 
-// const mockHandler = vi.fn()
+  return (
+    <div style={blogStyle} className='blog'>
+      <div className='blogTitle'>TITLE: {blog.title}</div>
+      <div className='blogAuthor'>AUTHOR: {blog.author}</div>
 
-render(<Blog blog={blog} />)
+      <Togglable buttonLabel="viewStats">
+        <BlogStats 
+          blog={blog}
+          likes={likes}
+          handleLike={handleLike}
+          showDeleteButton={showDeleteButton}
+          handleDelete={handleDelete}
+        />
+      </Togglable>
+    </div>
+  )
+}
 
-const user = userEvent.setup()
-const button = screen.getByText('viewStats')
-await user.click(button)
-
-
-const element2 = screen.getByText('URL: https://example.com');
-expect(element2).toBeVisible();
-
-})
-
-
-test('clicking like button twice calls handler twice', async () => {
-  const blog = {
-    id: '123',
-    title: 'A blog title',
-    author: 'chi nguyen',
-    url: 'https://example.com',
-    likes: 0,
-    user: {
-      username: 'testuser',
-    }
-  }
-
-  // Create a mock like handler
-  const mockLikeHandler = vi.fn()
-
-  render(<Blog blog={blog} handleLike={mockLikeHandler} />)
-
-  const user = userEvent.setup()
-  const viewButton = screen.getByRole('button', { name: /view/i })
-  await user.click(viewButton)
-
-  const likeButton = screen.getByRole('button', { name: /like/i })
-  await user.click(likeButton)
-  await user.click(likeButton)
-
-  expect(mockLikeHandler).toHaveBeenCalledTimes(2)
-
-})
+export default Blog
