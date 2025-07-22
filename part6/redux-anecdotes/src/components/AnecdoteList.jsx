@@ -1,13 +1,12 @@
 import { useSelector, useDispatch } from 'react-redux'
 import { useMemo } from 'react' // Add useMemo hook
 import { vote } from '../reducers/anecdoteReducer'
-import { setNotification } from '../reducers/notificationReducer'
+import { setNotificationWithTimeout } from '../reducers/notificationReducer'
 
 const AnecdoteList = () => { 
     const dispatch = useDispatch()
     // 1. Get raw anecdotes from state
     const anecdotes = useSelector(state => {
-            console.log(state)
 
         if (state.filter === '') {
             return state.anecdotes
@@ -20,13 +19,10 @@ const AnecdoteList = () => {
         return [...anecdotes].sort((a, b) => b.votes - a.votes)
     }, [anecdotes]) // Only recompute when anecdotes change
 
-    const handleVote = (id,  content) => { 
-        dispatch(vote(id))
-
-        dispatch(setNotification(`You voted for ${content}`))
-        setTimeout(() => {
-            dispatch(setNotification(''))
-        }, 5000)
+    const handleVote = (anecdote) => { 
+        dispatch(vote(anecdote))
+        dispatch(setNotificationWithTimeout(`you voted '${anecdote.content}'`, 10))
+        
     }
 
     return ( 
@@ -36,7 +32,7 @@ const AnecdoteList = () => {
                 <div>{anecdote.content}</div>
                 <div>
                     has {anecdote.votes}
-                    <button onClick={() => handleVote(anecdote.id, anecdote.content)}>vote</button>
+                    <button onClick={() => handleVote(anecdote)}>vote</button>
                 </div>
             </div>
         ))}
